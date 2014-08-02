@@ -1,0 +1,74 @@
+<div company-menu class="container" active-item="0"></div>
+<div class="alt-container">
+<div class="container">
+<h1>{{company.name}}</h1>
+<ul class="list-unstyled">
+
+	<li>
+	<div class="row">
+		<div class="col-md-12">
+			<ul class="list-inline highlights">
+				<li>
+					
+					<strong>18<span>m</span></strong>Customers
+				</li>
+				<li>
+					
+					<strong>{{company.markets.length}}24 </strong>countries
+				</li>
+				<li>
+					<strong>250</strong>partners
+				</li>
+				<li>
+					
+					<strong>2500 <span>km</span></strong>cable
+				</li>
+				<li>
+					
+					<strong>{{company.pop.length}} 45</strong>PoPs
+				</li>
+				<li>
+					
+					<strong>0{{company.markets.length}}</strong>Base stations
+				</li>
+				<li>
+					
+					<strong>1980</strong>- Present
+				</li>
+			</ul>
+		</div>
+		</div>
+	</li>
+	<li>
+	<div class="row">
+		<div class="col-md-9">
+
+					<div class="btn-group tab-buttons">
+						<button type="button" class="btn btn-default" ng-click="showGlobal()" ng-class="{ 'active' : activeMap == 'showGlobal' }">Global offices</button>
+						<button type="button" class="btn btn-default" ng-click="showNetwork()" ng-class="{ 'active' : activeMap == 'showNetwork' }">Network presence</button>
+						<button type="button" class="btn btn-default" ng-click="showPoPs()" ng-class="{ 'active' : activeMap == 'showPoPs' }">PoPs</button>
+						<button type="button" class="btn btn-default" ng-click="showSubSeaCable()" ng-class="{ 'active' : activeMap == 'showSubSeaCable' }">Sub-sea cable</button>
+						<button type="button" class="btn btn-default" ng-click="showSubSeaCable2()" ng-class="{ 'active' : activeMap == 'showSubSeaCable2' }">Sub-sea cable2</button>
+					</div>
+					<div class="map" map-view data="data" latitude="latitude" longitude="longitude">
+					</div>
+					<div class="coordinates">
+						<span class="latitude">{{ latitude }}</span>
+						<span class="longitude">{{ longitude }}</span>
+					</div>
+
+		</div>
+		<div class="col-md-3">
+			<h2>Headquarters</h2>
+			<address ng-repeat="address in company.headQuarter">
+				{{address.address}}<br />
+				{{address.city}}<br />
+				{{address.zipcode}}<br />
+				{{address.country}}<br />
+				<abbr title="Phone">P:</abbr> {{address.phone}}
+			</address>
+		</div>
+		</div>
+	<li>
+</ul></li>
+</div>

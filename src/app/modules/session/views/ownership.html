@@ -1,0 +1,48 @@
+<div company-menu class="container" active-item="2"></div>
+<div class="main-content">
+	<div class="alt-container">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8">
+
+						<!-- Default panel contents -->
+
+								<h3>Shareholders</h3>
+
+							<div pie-chart-view data="data" class="chart" style="height:350px;"></div>
+
+					</div>		
+				</div>
+			</div>
+		</div>
+
+	<div class="container">
+		<div class="col-md-12">
+
+				<!-- Default panel contents -->
+
+					<h3>Subsidiaries</h3>
+
+				<!-- List group -->
+				<ul class="list-group company-list">
+					<li class="list-group-item active">
+						<div class="row">
+							<div class="col-md-9"><strong>Company Name</strong></div>
+							<div class="col-md-3 text-center"><strong>Shareholding</strong></div>
+						</div>	
+					</li>	
+					<li class="list-group-item" ng-repeat="company in subsidiaries">
+						<div class="row">
+							<div class="col-md-9">
+								<h4>{{company.name}}</h4>
+								<p>{{company.name}}</p>
+							</div>
+							<div class="col-md-3 text-center" style="padding-top:20px;"><strong>{{company.share}} %</strong></div>
+						</div>
+					</li>
+				</ul>
+
+		</div>
+	</div>
+</div>
+

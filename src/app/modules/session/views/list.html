@@ -1,0 +1,111 @@
+<div class="main-content">
+<div class="container"><div class="row"><h1>Showing:  <span id="totalRecordFound">{{companies.data.length}}</span> companies</h1>
+	<div class="col-md-3">
+		<div class="panel panel-default search-filters clearfix">
+			<div class="panel-heading visible-lg-block visible-md-block">
+				Filters
+				<button ng-if="hasListFilters" type="button" class="btn btn-primary btn-xs pull-right" ng-click="resetFilters()">Reset
+			</div>
+			<div class="panel-heading hidden-lg hidden-md clearfix" ng-click="showFiltersMobile = !showFiltersMobile">
+				Filters 
+				<span ng-if="showFiltersMobile" class="glyphicon glyphicon-arrow-down"></span>
+				<span ng-if="!showFiltersMobile" class="glyphicon glyphicon-arrow-up"></span>
+			</div>
+			<ul class="list-group" ng-class="!showFiltersMobile ? 'visible-lg-block visible-md-block' : ''">
+				<li class="list-group-item" ng-if="hasListFilters">
+					<div ng-repeat="(type, listFilter) in listFilters">
+						<button class="btn btn-xs" ng-repeat="filter in listFilter" style="margin:2px;" ng-click="listFilter.splice($index,1)">x {{filter}}</button>
+					</div>
+				</li>
+
+				<list-view data="companies.filters.services" filters="listFilters.services" title="Services" limit="5"></list-view>
+				<list-view data="companies.filters.markets" filters="listFilters.markets" title="Region" limit="5"></list-view>
+				<list-view data="companies.filters.companySizes" filters="listFilters.companySize" title="Company Size" limit="5"></list-view>
+				<list-view data="companies.filters.types" filters="listFilters.types" title="Company type" limit="5"></list-view>
+				<list-view data="companies.filters.regions" filters="listFilters.regions" title="Region" limit="5"></list-view>
+				<list-view data="companies.filters.sponsorTypes" filters="listFilters.sponsored" title="Sponsored company" limit="5"></list-view>
+			
+			</ul>
+		</div>
+	</div>
+	<div class="col-md-7">
+		
+			
+			<!-- Default panel contents -->
+			<div id="companyList" class="panel-heading clearfix search-tabs">
+				<div class="col-xs-8">
+					<a href="" ng-click="orderBy('name')">
+						Company Name
+					</a>
+				</div>
+				<div class="col-xs-2">
+					<a href="" ng-click="orderBy('name')">
+						Network
+					</a>
+				</div>
+				<div class="col-xs-2">
+					<a href="" ng-click="orderBy('name')">
+						Stories
+					</a>
+				</div>
+			</div>
+			<!-- List group -->
+			<ul class="list-group company-list">
+				<li ng-class="{'selected':isAddedToCompare(company.id), 'sponsored':company.sponsored=='Yes'}" ng-style="" class="list-group-item" ng-repeat="company in companies.data|orderBy:predicate:reverse|page:currentPage:pageSize">
+					<div class="row"><div ng-if="company.sponsored=='Yes'" class="sponsored-text"><span>Sponsored</span></div>
+						<div class="col-xs-8">
+							<a href="/company/profile">
+							<h4>{{company.name}}</h4></a>
+							<p>{{company.types.join(', ')}} - {{company.contact.address.country}}</p>
+							
+							<a ng-if="!isAddedToCompare(company.id)"  ng-click="addToCompare(company.id)"><span class="icon-check-empty"></span> Compare</a>
+							<a ng-if="isAddedToCompare(company.id)"  ng-click="removeFromCompare(company.id)"><span class="icon-check"></span> Compare</a>
+							<a ng-click="showDetails = ! showDetails">Contact details<b class="caret"></b></a>
+						</div>
+						<div class="col-xs-2 text-center"><strong class="countries">134</strong><br /><span class="text-muted">countries</span></div>
+						<div class="col-xs-2 text-center">
+						
+
+					<strong class="stories">2</strong><br /><span class="text-muted">stories</span></div>
+					</div>
+					<div class="row" ng-if="showDetails">
+
+				<div class="popover" style="display:block;position:static;max-width:100%;">
+					<div class="popover-content">
+						<address>
+							{{company.contact.name}}<br />
+							{{company.contact.jobTitle}}<br />
+							{{company.contact.address.join (', ')}}<br />
+							<a href="mailto:{{company.contact.email}}">{{company.contact.email}}</a><br />
+							<a href="{{company.website}}" target="_blank">{{company.website}}</a><br />
+							<abbr title="Phone">P:</abbr> {{company.contact.phones.join(', ')}}
+						</address>
+	 
+					</div>
+				</div>
+
+					</div>
+				</li>
+				<li class="list-group-item">
+					<pagination items="companies.data" page-current="currentPage" page-size="pageSize"></pagination>
+				</li>
+			</ul>
+		
+	</div>
+
+	<div class="col-md-2">
+		<related-companies items="sponsoredCompanies" header="Sponsored Companies" class="visible-lg-block visible-md-block"></related-companies>
+	</div>
+
+	<div ng-if="companiesToCompare.length>0" class="navbar-fixed-bottom selected-items">
+		<span>
+			My companies ({{companiesToCompare.length}})
+		</span>
+		<a type="button" href="#/company/compare" class="btn btn-primary">Compare Selected Companies</a>
+		<a type="button" ng-click="resetCompareList()" class="btn btn-default">Reset</a>
+		
+		
+	</div>
+</div>
+</div>
+</div>

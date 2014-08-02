@@ -1,0 +1,111 @@
+<div class="main_content"><div class="container"><div class="row" style="margin-top:30px;">
+	<div class="col-md-12">
+		<div class="col-md-10">
+			<div class="row">
+				<div class="col-md-3">
+					<div class="panel panel-default">
+						<ul class="list-group">
+							<li class="list-group-item">
+								<div>
+									<button style="width:100%;text-align: left;" type="button" class="btn btn-default col-md-2"><span class="glyphicon glyphicon-plus"></span> Add</button>
+								</div>
+								<div>
+									<button style="width:100%;text-align: left;" type="button" class="btn btn-default col-md-2"><span class="glyphicon glyphicon-export"></span> Export</button>
+								</div>
+								<div>
+									<button style="width:100%;text-align: left;" type="button" class="btn btn-default col-md-2">Back to full list</button>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-3" ng-repeat="company in companies|limitTo:3">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<button type="button" ng-click="removeCompany(company.id)" class="btn btn-primary btn-xs pull-right">X</button>
+							<h4>{{company.name}}</h4>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						KEY STATS
+					</div>
+					<div class="panel-body">
+						<ul class="list-group">
+							<li class="list-group-item clearfix">
+								<div class="col-md-3">
+									Network presence
+								</div>
+								<div class="col-md-3" ng-repeat="company in companies|limitTo:3">
+									15 countries
+								</div>
+							</li>
+							<li class="list-group-item clearfix">
+								<div class="col-md-3">
+									Company size
+								</div>
+								<div class="col-md-3" ng-repeat="company in companies|limitTo:3">
+									16,546 employees
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						NETWORK
+					</div>
+					<div class="panel-body">
+						<ul class="list-group">
+							<li class="list-group-item clearfix">
+								<div class="col-md-3">
+									Number of PoPs
+								</div>
+								<div class="col-md-3" ng-repeat="company in companies|limitTo:3">
+									250
+								</div>
+							</li>
+							<li class="list-group-item clearfix">
+								<div class="col-md-3">
+									Cable length
+								</div>
+								<div class="col-md-3" ng-repeat="company in companies|limitTo:3">
+									2500km
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-2 pull-right">
+			<div class="panel panel-default">
+				<div class="panel-heading">Recommended companies</div>
+				<div class="panel-body">
+					<ul class="list-group">
+						<li class="list-group-item clearfix">
+							<a type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span> Add</a>
+							<a href="#">aa</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-heading">Recently viewed</div>
+				<div class="panel-body">
+					<ul class="list-group">
+						<li class="list-group-item clearfix">
+							<a type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span> Add</a>
+							<a href="#">aa</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div></div></div>
