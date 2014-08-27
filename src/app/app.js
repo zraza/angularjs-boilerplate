@@ -1,22 +1,28 @@
 angular.module('app', [
 	'ngRoute',
-	'app.company',
-	'app-templates',
-	'slugifier',
-	'ngAnimate',
-])
-	.config(function($routeProvider, snapRemoteProvider, $locationProvider) {
-		'use strict';
-		$locationProvider.html5Mode(true);
+	'app.default'
+]).config(function($routeProvider, $locationProvider/*, $provide*/) {
+	'use strict';
+	// Use html5 push state for SEO friendly URL, DO NOT prefix URLs # while this is set to true, for non HTML5 browser, AngularJS will fallback to # automatically
+	$locationProvider.html5Mode(true);
 
-		$routeProvider
-			.when('/404', {
-				templateUrl: '404.html'
-			})
-			.otherwise({
-				redirectTo: '/404'
-			});
-	}).run(function($rootScope, snapRemote, matchmedia) {
-		'use strict';
+	// Uncommment following if you want to fallback to hash even for Hashtag compatible browsers, this is important, if you want to deply your application using phonegap and dont want to change URL to prefix them with hash.
+	/*
+		$provide.decorator('$sniffer', function($delegate) {
+			$delegate.history = false;
+			return $delegate;
+		});
+	*/
 
-	});
+}).run(function($rootScope) {
+	'use strict';
+	// This can be change in controller
+	$rootScope.appPageTitle = 'App Title';
+	// This will get page title from the defined routs
+	$rootScope.$on('$routeChangeSuccess', function (event, current) {
+        if (current.hasOwnProperty('$$route') && current.$$route.pageTitle) {
+            $rootScope.appPageTitle = current.$$route.pageTitle;
+        }
+    });
+
+});

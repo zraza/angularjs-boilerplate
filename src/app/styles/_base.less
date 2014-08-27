@@ -1,0 +1,25 @@
+section#listing {
+  .container-fixed();
+  //background: #E2E2E2;
+  .clearfix();
+  >ul {
+    padding:0;
+    .make-row();
+    .clearfix();
+    >li {
+      list-style: none;
+      .make-sm-column(6);
+      .make-md-column(4);
+      //.make-lg-column(3);
+      margin-bottom: @grid-gutter-width;
+      img{
+      	max-width: 100%;
+      }
+      .detail {
+        .box-shadow(0 0.5px 0.5px rgba(0, 0, 0, .1));
+        padding: 10px;
+        background: #fff;
+      }
+    }
+  }
+}

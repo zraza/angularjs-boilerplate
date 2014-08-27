@@ -1,23 +1,23 @@
 /* jshint node: true */
 'use strict';
+
 var gulp = require('gulp'),
   g = require('gulp-load-plugins')({
     lazy: false
   }),
   noop = g.util.noop,
   es = require('event-stream'),
+  bowerFiles = require('main-bower-files'),
+  rimraf = require('rimraf'),
   queue = require('streamqueue'),
   lazypipe = require('lazypipe'),
   stylish = require('jshint-stylish'),
   bower = require('./bower'),
-  exec = require('child_process').exec,
-  gutil = require('gulp-util'),
-  args = require('yargs').argv,
-  runSequence = require('run-sequence'),
   rewriteModule = require('http-rewrite-middleware'),
-  isWatching = false;
-
-
+  browserSync = require('browser-sync'),
+  plumber = require('gulp-plumber'),
+  isWatching = false,
+  isBrowserSync=true;
 
 var htmlminOpts = {
   removeComments: true,
@@ -26,6 +26,10 @@ var htmlminOpts = {
   collapseBooleanAttributes: true,
   removeRedundantAttributes: true
 };
+
+var publicRoots = ['./.tmp', './.tmp/src/app', './src/app', './bower_components'];
+var middlewareRules = [rewriteModule.getMiddleware([{from: '^[^.]*$',to: '/index.html'}, ])];
+var lessIncludePaths = ['./bower_components'];
 
 /**
  * JS Hint
@@ -43,16 +47,17 @@ gulp.task('jshint', function() {
 /**
  * CSS
  */
-gulp.task('clean-css', function() {
-  return gulp.src('./.tmp/css').pipe(g.clean());
+gulp.task('clean-css', function(done) {
+  rimraf('./.tmp/css', done);
 });
 
 gulp.task('styles', ['clean-css'], function() {
   return gulp.src([
     './src/app/**/*.less',
-    '!./src/app/**/_*/**/*.less'
+    '!./src/app/**/_*.less'
   ])
-    .pipe(g.less())
+    //.pipe(plumber())
+    .pipe(g.less({paths:lessIncludePaths}))
     .pipe(gulp.dest('./.tmp/css/'))
     .pipe(g.cached('built-css'))
     .pipe(livereload());
@@ -63,11 +68,10 @@ gulp.task('styles-dist', ['styles'], function() {
 });
 
 gulp.task('csslint', ['styles'], function() {
-  return cssFiles();
-
-  //  .pipe(g.cached('csslint'))
-   // .pipe(g.csslint('./.csslintrc'))
-    //.pipe(g.csslint.reporter());
+  return cssFiles()
+    .pipe(g.cached('csslint'))
+    .pipe(g.csslint('./.csslintrc'))
+    .pipe(g.csslint.reporter());
 });
 
 /**
@@ -75,7 +79,7 @@ gulp.task('csslint', ['styles'], function() {
  */
 gulp.task('scripts-dist', ['templates-dist'], function() {
   return appFiles().pipe(dist('js', bower.name, {
-    ngmin: true
+    ngAnnotate: true
   }));
 });
 
@@ -96,11 +100,19 @@ gulp.task('templates-dist', function() {
  * Vendors
  */
 gulp.task('vendors', function() {
-  var bowerStream = g.bowerFiles();
-  return es.merge(
-    bowerStream.pipe(g.filter('**/*.css')).pipe(dist('css', 'vendors')),
-    bowerStream.pipe(g.filter('**/*.js')).pipe(dist('js', 'vendors'))
-  );
+  var files = bowerFiles();
+  var vendorJs = fileTypeFilter(files, 'js');
+  var vendorCss = fileTypeFilter(files, 'css');
+  var q = new queue({
+    objectMode: true
+  });
+  if (vendorJs.length) {
+    q.queue(gulp.src(vendorJs).pipe(dist('js', 'vendors')));
+  }
+  if (vendorCss.length) {
+    q.queue(gulp.src(vendorCss).pipe(dist('css', 'vendors')));
+  }
+  return q.done();
 });
 
 /**
@@ -114,7 +126,7 @@ function index() {
     read: false
   };
   return gulp.src('./src/app/index.html')
-    .pipe(g.inject(g.bowerFiles(opt), {
+    .pipe(g.inject(gulp.src(bowerFiles(), opt), {
       ignorePath: 'bower_components',
       starttag: '<!-- inject:vendor:{{ext}} -->'
     }))
@@ -136,25 +148,9 @@ gulp.task('assets', function() {
 });
 
 /**
- * Assets
- */
-gulp.task('styleAssets', function() {
-  return gulp.src('./src/app/styles/img/**')
-    .pipe(gulp.dest('./dist/styles/img'));
-});
-
-/**
- * Assets
- */
-gulp.task('fontAssets', function() {
-  return gulp.src('./src/app/fonts/**')
-    .pipe(gulp.dest('./dist/fonts'));
-});
-
-/**
  * Dist
  */
-gulp.task('dist', ['vendors', 'assets','styleAssets','fontAssets', 'styles-dist', 'scripts-dist'], function() {
+gulp.task('dist', ['vendors', 'assets', 'styles-dist', 'scripts-dist'], function() {
   return gulp.src('./src/app/index.html')
     .pipe(g.inject(gulp.src('./dist/vendors.min.{js,css}'), {
       ignorePath: 'dist',
@@ -172,27 +168,17 @@ gulp.task('dist', ['vendors', 'assets','styleAssets','fontAssets', 'styles-dist'
  */
 gulp.task('statics', g.serve({
   port: 3000,
-  root: ['./.tmp', './src/app', './bower_components'],
-  middlewares:[rewriteModule.getMiddleware([
-         {from: '^[^.]*$', to: '/index.html'},
-    ])]
+  root: publicRoots,
+  middlewares: middlewareRules
 }));
 
-
-gulp.task('reload',function() {
-  isWatching = true;
-  // Initiate livereload server:
-  g.livereload();
-  gulp.watch('./src/app/**/*.js', ['jshint']).on('change', function(evt) {
-    if (evt.type !== 'changed') {
-      gulp.start('index');
-    }
-  });
-  gulp.watch('./src/app/index.html', ['index']);
-  gulp.watch(['./src/app/**/*.html', '!./src/app/index.html'], ['templates']);
-  gulp.watch(['./src/app/**/*.less'], ['csslint']).on('change', function(evt) {
-    if (evt.type !== 'changed') {
-      gulp.start('index');
+// Static server wich will sync all conntected devices
+gulp.task('browser-sync', function() {
+  browserSync({
+    server: {
+      port: 3000,
+      baseDir: publicRoots,
+      middleware: middlewareRules
     }
   });
 });
@@ -201,7 +187,27 @@ gulp.task('reload',function() {
  * Watch
  */
 gulp.task('serve', ['watch']);
-gulp.task('watch', ['statics', 'default','reload']);
+gulp.task('watch', [isBrowserSync?'browser-sync':'statics', 'default'], function() {
+  isWatching = true;
+  // Initiate livereload server:
+  g.livereload.listen();
+  gulp.watch('./src/app/**/*.js', ['jshint']).on('change', function(evt) {
+    if (evt.type !== 'changed') {
+      gulp.start('index');
+    } else {
+      g.livereload.changed(evt);
+    }
+  });
+  gulp.watch('./src/app/index.html', ['index']);
+  gulp.watch(['./src/app/**/*.html', '!./src/app/index.html'], ['templates']);
+  gulp.watch(['./src/app/**/*.less'], ['csslint']).on('change', function(evt) {
+    if (evt.type !== 'changed') {
+      gulp.start('index');
+    } else {
+      //g.livereload.changed(evt);
+    }
+  });
+});
 
 /**
  * Default task
@@ -219,43 +225,9 @@ gulp.task('lint', ['jshint', 'csslint']);
 gulp.task('test', ['templates'], function() {
   return testFiles()
     .pipe(g.karma({
-      singleRun: false,
       configFile: 'karma.conf.js',
       action: 'run'
     }));
-});
-
-/**
- * Deploy
- */
-//gulp.task('deploy', ['dist', 'deployAzure']);
-
-gulp.task('deploy', function(callback) {
-  runSequence('pullAzure','dist', 'deployAzure')
-});
-
-
-gulp.task('deployAzure', function() {
-  if (!args.message) {
-    gutil.log('Missing parameter --message: usage: gulp deploy --message="commit message"');
-    return false;
-  }
-  deployAzure('.', './dist', 'test');
-});
-gulp.task('pullAzure', function() {
-  pullAzure('.', './dist');
-});
-
-
-gulp.task('pullIcons',function () {
-  gutil.log('pulling icons from fontello');
-  exec('fontello-cli install --css=src/app/styles/fontello --font=src/app/fonts', {
-  }, function(err, stdout, stderr) {
-    if (err) {
-      gutil.log(err);
-    }
-  });
-
 });
 
 /**
@@ -283,10 +255,10 @@ function testFiles() {
   return new queue({
     objectMode: true
   })
-    .queue(g.bowerFiles().pipe(g.filter('**/*.js')))
+    .queue(gulp.src(fileTypeFilter(bowerFiles(), 'js')))
     .queue(gulp.src('./bower_components/angular-mocks/angular-mocks.js'))
     .queue(appFiles())
-    .queue(gulp.src('./src/app/**/*_test.js'))
+    .queue(gulp.src(['./src/app/**/*_test.js', './.tmp/src/app/**/*_test.js']))
     .done();
 }
 
@@ -305,11 +277,13 @@ function cssFiles(opt) {
 function appFiles() {
   var files = [
     './.tmp/' + bower.name + '-templates.js',
+    './.tmp/src/app/**/*.js',
+    '!./.tmp/src/app/**/*_test.js',
     './src/app/**/*.js',
     '!./src/app/**/*_test.js'
   ];
-  return gulp.src(files);
-    //.pipe(g.angularFilesort());
+  return gulp.src(files)
+    .pipe(g.angularFilesort());
 }
 
 /**
@@ -328,13 +302,26 @@ function templateFiles(opt) {
 function buildTemplates() {
   return lazypipe()
     .pipe(g.ngHtml2js, {
-      moduleName: bower.name + '-templates',
+      moduleName: bower.name,
       prefix: '/' + bower.name + '/',
       stripPrefix: '/src/app'
     })
     .pipe(g.concat, bower.name + '-templates.js')
     .pipe(gulp.dest, './.tmp')
     .pipe(livereload)();
+}
+
+/**
+ * Filter an array of files according to file type
+ *
+ * @param {Array} files
+ * @param {String} extension
+ * @return {Array}
+ */
+
+function fileTypeFilter(files, extension) {
+  var regExp = new RegExp('\\.' + extension + '$');
+  return files.filter(regExp.test.bind(regExp));
 }
 
 /**
@@ -350,9 +337,9 @@ function dist(ext, name, opt) {
   return lazypipe()
     .pipe(g.concat, name + '.' + ext)
     .pipe(gulp.dest, './dist')
-    .pipe(opt.ngmin ? g.ngmin : noop)
-    .pipe(opt.ngmin ? g.rename : noop, name + '.annotated.' + ext)
-    .pipe(opt.ngmin ? gulp.dest : noop, './dist')
+    .pipe(opt.ngAnnotate ? g.ngAnnotate : noop)
+    .pipe(opt.ngAnnotate ? g.rename : noop, name + '.annotated.' + ext)
+    .pipe(opt.ngAnnotate ? gulp.dest : noop, './dist')
     .pipe(ext === 'js' ? g.uglify : g.minifyCss)
     .pipe(g.rename, name + '.min.' + ext)
     .pipe(gulp.dest, './dist')();
@@ -375,47 +362,4 @@ function jshint(jshintfile) {
   return lazypipe()
     .pipe(g.jshint, jshintfile)
     .pipe(g.jshint.reporter, stylish)();
-};
-
-
-function deployAzure(file, cwd, message) {
-  gutil.log('Adding file to commit');
-  exec('git add ' + file, {
-    cwd: cwd
-  }, function(err, stdout, stderr) {
-    if (err) {
-      gutil.log(err);
-      return;
-    }
-    gutil.log('Committing files');
-    exec('git commit -m \'' + message + '\'', {
-      cwd: cwd
-    }, function(err, stdout, stderr) {
-      if (err) {
-        gutil.log('Nothing to commit, exiting...');
-        return;
-      }
-      gutil.log('deploying to azure');
-      exec('git push azure master', {
-        cwd: cwd
-      }, function(err, stdout, stderr) {
-        if (err) {
-          gutil.log(err);
-        }
-      });
-    });
-  })
-};
-
-function pullAzure(file, cwd) {
-  gutil.log('pulling latest from');
-  exec('git pull azure master', {
-    cwd: cwd
-  }, function(err, stdout, stderr) {
-    if (err) {
-      gutil.log(err);
-    }
-  });
-
-};
-
+}
