@@ -5,5 +5,5 @@
   "compatible-vendor-prefixes": false,
   "gradients": false,
   "adjoining-classes": false,
-  "outline-none" : false
+  "outline-none" : true
 }
