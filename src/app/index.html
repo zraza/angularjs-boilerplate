@@ -1,6 +1,4 @@
 <html ng-app="app">
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -16,14 +14,36 @@
         <!-- inject:css -->
         <link rel="stylesheet" href="/css/app.css">
         <link rel="stylesheet" href="/css/modules/default/views/styles/error.css">
+        <link rel="stylesheet" href="/styles/css/animation.css">
+        <link rel="stylesheet" href="/styles/css/fontello.css">
         <!-- endinject -->
     </head>
     <body>
         <!--[if lt IE 8]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-        <a href="/a">a</a>
-        <a href="/b">b</a>
+
+
+        <header id="header">
+
+        <nav>
+            <ul>
+            <li class="active"><a href="/a">Home <i class="icon-search">x</i> </a></li>
+            <li><a href="/b">About</a></li>
+            <li><a href="#">Blogs</a></li>
+            <li><a href="#">Jobs</a></li>
+            <li><a href="#">Random</a></li>
+
+            <li class="submit">
+                <a class="bold" href="#">Submit Your Site</a>
+            </li>
+
+            </ul>
+           </nav> 
+        </header>
+
+      
+
 
         <ng-view></ng-view>
         <!-- inject:vendor:js -->
@@ -34,7 +54,6 @@
         <script src="/modules/default/bootstrap.js"></script>
         <script src="/modules/default/controllers/List.js"></script>
         <script src="/modules/default/controllers/Error.js"></script>
-        <script src="/modules/default/_tests/ErrorCtr.js"></script>
         <script src="/app.js"></script>
         <script src="/app-templates.js"></script>
         <!-- endinject -->

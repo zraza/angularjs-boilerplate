@@ -1,0 +1,44 @@
+#header nav {
+    
+    //height: 67px;
+    //line-height: 48px;
+    //position: relative;
+    //transition: background 0.25s ease-out 0s;
+    //width: 100%;
+    //z-index: 200;
+
+    >ul{
+        .clearfix();
+        //.container-fixed();
+        background: #1E1E1E;
+        border-bottom: 1px solid #d2d6d5;
+        margin-bottom: @grid-gutter-width;
+        li{
+            float:left;
+            padding:30px 60px;
+            //font-weight: bold;
+            border-left: 1px solid #000;
+            font-size: 18px;
+            &:first-child{
+                //border-left: 0;
+            }
+            &.submit{
+                background: #3c948b;
+                font-weight: bold;
+                float: right;
+                a{
+                    color: #fff;
+                }
+            }
+            a{
+                color:#fff;
+            }
+            &:hover{
+                background: #000;
+            }
+            &.active{
+                background: #101010;   
+            }
+        }
+    }
+}

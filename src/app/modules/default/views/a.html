@@ -1,9 +1,12 @@
 <section id="listing">
 <ul>
 	<li ng-repeat="item in items">
-
+	<img src="http://i4.ytimg.com/vi/{{item.thumbnail}}/0.jpg">	
 	<div class="detail">
- 	- {{item}}
+ 	
+	<h4>{{item.title}}</h4>
+	<p>{{item.topics.join(', ')}}</p>
+
  </div>
  </li>
 </ul>
